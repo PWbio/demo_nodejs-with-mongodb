@@ -2,14 +2,14 @@ const mongoose = require("mongoose"); // object
 
 // first write something to database, which will create collection automatically once we write some documents.
 mongoose
-  .connect("mongodb://localhost/shopInfo")
+  .connect("mongodb://localhost/compInfo")
   .then(() => console.log("Success: connected to MongoDB...")) // Debug module prefered!!!
   .catch((err) =>
     console.error("Fail: cannot connect to MongoDB", err.message)
   );
 
 // define the datatype of documents
-const shopSchema = new mongoose.Schema({
+const compSchema = new mongoose.Schema({
   name: { type: String, required: true },
   address: { type: String, required: true },
   contact: { type: String, required: true },
@@ -17,16 +17,21 @@ const shopSchema = new mongoose.Schema({
 });
 
 // compile schema into model (similar to class v.s. object)
-const Shop = mongoose.model("Shop", shopSchema); // return a class
+const Comp = mongoose.model("Company", compSchema); // return a class
 
-const createShop = async ({ name, address, contact, phone }) => {
-  const shop = new Shop({ name, address, contact, phone }); // new document
-  const result = await shop.save(); // upload document
+const createComp = async ({ name, address, contact, phone }) => {
+  const comp = new Comp({ name, address, contact, phone }); // new document
+  const result = await comp.save(); // upload document
   return result;
 };
 
-const getShop = async () => {
-  return await Shop.find().select({ __v: 0 });
+const getComp = async () => {
+  return await Comp.find().select({ __v: 0 });
+};
+
+const deleteComp = async (id) => {
+  // find first one and delete that
+  return await Comp.findByIdAndDelete({ _id: id });
 };
 
 // const getCourse = async () => {
@@ -58,17 +63,11 @@ const getShop = async () => {
 //   console.log(result);
 // };
 
-// const removeCourse = async (id) => {
-//   // find first one and delete that
-//   // deleteMany
-//   const result = await Course.findByIdAndDelete({ _id: id });
-
-//   console.log(result);
-// };
-
 // createCourse();
 
 module.exports = {
-  createShop,
-  getShop,
+  model: Comp,
+  createComp,
+  getComp,
+  deleteComp,
 };

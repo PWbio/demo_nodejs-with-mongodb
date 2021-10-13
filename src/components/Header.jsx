@@ -5,7 +5,7 @@ const Header = () => {
   return (
     <>
       <div className={S.Header}>
-        <span>Shop Information</span>
+        <span>Company Database</span>
       </div>
     </>
   );
