@@ -1,24 +1,40 @@
-import logo from './logo.svg';
-import './App.css';
+import AddingBox from "./components/AddingBox";
+import Header from "./components/Header";
+import Shop from "./components/Shop";
+import axios from "axios";
+
+const get = async () => {
+  try {
+    const result = await axios.get("http://localhost:8080");
+    console.log("success", result);
+  } catch (e) {
+    console.log("fail", e.message);
+  }
+};
+
+const post = async () => {
+  try {
+    const result = await axios.post("http://localhost:8080", {
+      name: "cpu store",
+      contact: "po",
+      phone: "+886-123-1234",
+      address: "taipei city",
+    });
+    console.log("success", result);
+  } catch (e) {
+    console.log("fail", e.response.data);
+  }
+};
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <>
+      <Header />
+      <AddingBox />
+      <Shop name="Cookie shop" contact="Po" address="street 1" phone="886" />
+      <button onClick={get}>GET</button>
+      <button onClick={post}>POST</button>
+    </>
   );
 }
 
