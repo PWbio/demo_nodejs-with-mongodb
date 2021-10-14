@@ -18,6 +18,8 @@ export const deleteOne = async (id) => axios.delete(host, { data: { id } });
 
 export const deleteAll = async () => axios.delete(`${host}/delete_all`);
 
+export const put = async (data) => axios.put(host, data);
+
 // const post = async () => {
 //     try {
 //       const result = await axios.post("http://localhost:8080", {

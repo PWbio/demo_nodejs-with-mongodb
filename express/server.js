@@ -11,7 +11,7 @@ app.use(allowCORS);
 
 app.get("/", async (req, res) => {
   try {
-    const result = await db.getComp();
+    const result = await db.find().select({ __v: 0 }); // remove useless field
     res.send(result);
     debugGET(`retrive ${result.length} documents`);
   } catch (e) {
@@ -22,7 +22,15 @@ app.get("/", async (req, res) => {
 
 app.post("/", async (req, res) => {
   try {
-    const result = await db.createComp(req.body);
+    let result;
+    if (Array.isArray(req.body)) {
+      // multiple document
+      result = await db.insertMany(req.body);
+    } else {
+      // single document
+      const document = new db(req.body);
+      result = await document.save();
+    }
     res.send(result);
     debugPOST(
       `create new company: ${
@@ -36,29 +44,43 @@ app.post("/", async (req, res) => {
 });
 
 app.delete("/", async (req, res) => {
-  // locate the id
+  // get the id from request
+  const { id } = req.body;
+  if (!id) return res.status(400).send("bad request: id is empty");
+  debugDELETE(id);
+
+  // find the data with the id
   try {
-    const company = await db.model.find({ _id: req.body.id });
-    debugDELETE(company);
+    await db.find({ _id: id });
   } catch (e) {
-    res.status(404).send("Not found");
+    return res.status(404).send("data not found");
   }
 
-  // delete that id
+  // delete data with the id
   try {
-    const result = await db.deleteComp(req.body.id);
-    res.send(result);
+    const result = await db.deleteOne({ _id: id });
+    debugDELETE(result);
+    res.status(200).end();
   } catch (e) {
-    res.status(500).send("database error");
-    debugDELETE(e.message);
+    return res.status(500).send("database error");
   }
 });
 
 app.delete("/delete_all", async (req, res) => {
-  console.log(111);
-  const result = await db.deleteAllComp();
-  console.log(result);
-  res.send(result);
+  try {
+    const result = await db.deleteMany({});
+    debugDELETE(result);
+    res.status(200).end();
+  } catch (e) {
+    return res.status(500).send("database error");
+  }
+});
+
+app.put("/", async (req, res) => {
+  console.log(req.body);
+  const { id } = req.body;
+  const exist = db.find({ _id: "asd" });
+  if (exist) console.log(true);
 });
 
 const port = 8080;

@@ -37,7 +37,7 @@ const usePrompt = () => {
         )}
       </>
     ),
-    [open]
+    [open, status, message]
   );
 
   return { Notification, setAlert };

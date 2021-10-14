@@ -16,7 +16,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import RestoreIcon from "@mui/icons-material/Restore";
 import PublishIcon from "@mui/icons-material/Publish";
 
-import { get, deleteOne, deleteAll } from "../axiosMethod";
+import * as api from "../axiosMethod";
 import S from "./MuiTable.module.scss";
 import usePrompt from "../hook/Message";
 
@@ -47,15 +47,15 @@ const EditableCell = ({ rowData, colName, onChange }) => {
   );
 };
 
-const MuiTable = ({ refresh }) => {
+const MuiTable = ({ refresh, setRefresh }) => {
   const [rows, setRows] = useState([]);
-  const [rowSnapshot, setRowSnapshot] = useState(new Object());
+  const [rowSnapshot, setRowSnapshot] = useState({});
   const { Notification, setAlert } = usePrompt();
 
-  const getData = async (simulateError = false) => {
+  const getData = async (message = true, simulateError = false) => {
     try {
       if (simulateError) throw new Error("Just a fake alarm.");
-      const { data } = await get();
+      const { data } = await api.get();
       // console.log(data);
       const parseData = data.map((v) => ({
         id: v._id, // require, @mui/x-data-grid.
@@ -67,11 +67,13 @@ const MuiTable = ({ refresh }) => {
       }));
       // console.log(parseData);
       setRows(parseData);
-      setAlert({
-        open: true,
-        status: "success",
-        message: "Succesfully retrieved data from database.",
-      });
+      if (message) {
+        setAlert({
+          open: true,
+          status: "success",
+          message: "Succesfully retrieved data from database.",
+        });
+      }
     } catch (e) {
       console.log(e.message);
       setAlert({
@@ -85,30 +87,43 @@ const MuiTable = ({ refresh }) => {
   const deleteData = async (id, index) => {
     // console.log(id, index);
     try {
-      const { data } = await deleteOne(id);
-      // console.log(data);
+      await api.deleteOne(id);
       const copyRows = [...rows];
       copyRows.splice(index, 1);
       setRows(copyRows);
       setAlert({
         open: true,
         status: "success",
-        message: `Succesfully deleted data from database: ${data.name}`,
+        message: "Deleted one data from database.",
       });
     } catch (e) {
       console.log(e.message);
       setAlert({
         open: true,
         status: "error",
-        message: `Failed to deleted data from database. (${e.message})`,
+        message: `Failed to delete data from database. (${e.message})`,
       });
     }
   };
 
   const deleteAllData = async () => {
     // need try-catch block
-    await deleteAll();
-    console.log("delete all data");
+    try {
+      await api.deleteAll();
+      setAlert({
+        open: true,
+        status: "success",
+        message: "Succesfully deleted all data from database",
+      });
+      getData(false);
+    } catch (e) {
+      console.log(e.message);
+      setAlert({
+        open: true,
+        status: "error",
+        message: `Failed to delete all data from database. (${e.message})`,
+      });
+    }
   };
 
   const toggleEditMode = (id, state) => {
@@ -124,10 +139,17 @@ const MuiTable = ({ refresh }) => {
     toggleEditMode(id, true);
   };
 
-  const closeEditor = (rowData, publish) => {
+  const closeEditor = async (rowData, publish) => {
     const { id } = rowData;
     if (publish) {
       console.log("save");
+      api.put({
+        id: rowData.id,
+        company: rowData.company,
+        address: rowData.address,
+        contact: rowData.contact,
+        phone: rowData.phone,
+      });
     } else {
       console.log("discard");
       setRows((prevRows) =>

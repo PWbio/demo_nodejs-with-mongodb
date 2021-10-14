@@ -19,11 +19,6 @@ const compSchema = new mongoose.Schema({
 // compile schema into model (similar to class v.s. object)
 const Comp = mongoose.model("Company", compSchema); // return a class
 
-// GET
-const getComp = async () => {
-  return await Comp.find().select({ __v: 0 }); // remove useless field
-};
-
 // POST
 const createComp = async (data) => {
   let result;
@@ -38,20 +33,24 @@ const createComp = async (data) => {
   return result;
 };
 
-// DELETE
-const deleteComp = async (id) => {
-  // find first one and delete that
-  return await Comp.findByIdAndDelete({ _id: id });
+// PUT
+const updateComp = async () => {
+  // Look up the course
+  // If not existing, return 404
+  const course = courses.find((c) => c.id === parseInt(req.params.id));
+  if (!course) return res.status(404).send("Not found");
+
+  // Validate
+  const { error } = validateCourse(req.body);
+
+  // If invalid, return 400 - Bad request
+  if (error) return res.status(400).send(error.details[0].message);
+
+  // Update course
+  course.name = req.body.name;
+
+  // Return the updated course
+  res.send(course);
 };
 
-const deleteAllComp = async () => {
-  return await Comp.deleteMany({});
-};
-
-module.exports = {
-  model: Comp,
-  createComp,
-  getComp,
-  deleteComp,
-  deleteAllComp,
-};
+module.exports = Comp;

@@ -5,6 +5,7 @@ import Divider from "@mui/material/Divider";
 import MuiTable from "./components/MuiTable";
 
 const App = () => {
+  // Trigger POST -> then GET newest data
   const [refresh, setRefresh] = useState(true);
   return (
     <>
@@ -12,7 +13,7 @@ const App = () => {
       <div style={{ margin: "1rem" }}>
         <AddingBox setRefresh={setRefresh} />
         <Divider variant="middle" />
-        <MuiTable refresh={refresh} />
+        <MuiTable refresh={refresh} setRefresh={setRefresh} />
       </div>
     </>
   );
@@ -20,7 +21,6 @@ const App = () => {
 
 export default App;
 
-// POST (new data) -> GET (new data)
 // POST: upload multiple entries, if one entries have error property and value. Raise Warning. Status Code 207?
 
 // constrait API, restrict input fields
