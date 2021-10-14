@@ -1,35 +1,13 @@
 import axios from "axios";
 
 const host = "http://localhost:8080";
-export const get = async () => axios.get(host);
+export const get = async () => await axios.get(host);
 
-export const post = async (data) => {
-  try {
-    const result = await axios.post(host, data);
-    console.log("success", result);
-  } catch (e) {
-    console.log("fail");
-    console.log(e.response);
-    // if (e.response) console.log(e.reponse.data);
-  }
-};
+export const post = async (data) => await axios.post(host, data);
 
-export const deleteOne = async (id) => axios.delete(host, { data: { id } });
+export const deleteOne = async (id) =>
+  await axios.delete(host, { data: { id } });
 
-export const deleteAll = async () => axios.delete(`${host}/delete_all`);
+export const deleteAll = async () => await axios.delete(`${host}/delete_all`);
 
-export const put = async (data) => axios.put(host, data);
-
-// const post = async () => {
-//     try {
-//       const result = await axios.post("http://localhost:8080", {
-//         name: "cpu store",
-//         contact: "po",
-//         phone: "+886-123-1234",
-//         address: "taipei city",
-//       });
-//       console.log("success", result);
-//     } catch (e) {
-//       console.log("fail", e.response.data);
-//     }
-//   };
+export const put = async (data) => await axios.put(host, data);

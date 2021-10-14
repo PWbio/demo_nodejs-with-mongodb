@@ -183,14 +183,16 @@ const MuiTable = ({ refresh, setRefresh }) => {
   };
 
   useEffect(() => {
-    console.log("gettttt");
     getData();
+  }, []);
+
+  useEffect(() => {
+    getData(false);
   }, [refresh]);
 
   return (
     <>
       <Notification />
-      <button onClick={() => console.log(rowSnapshot)}>test</button>
       <div className={S.buttons}>
         <Button
           onClick={() => getData()}
@@ -210,7 +212,7 @@ const MuiTable = ({ refresh, setRefresh }) => {
           Remove All Data (DELETE)
         </Button>
         <Button
-          onClick={() => getData(true)}
+          onClick={() => getData(true, true)}
           variant="outlined"
           color="error"
           endIcon={<WarningIcon />}

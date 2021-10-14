@@ -4,6 +4,7 @@ import { Button, TextField } from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";
 import { post } from "../axiosMethod";
 import faker from "faker";
+import usePrompt from "../hook/Message";
 
 const metadata = [
   {
@@ -25,6 +26,8 @@ const metadata = [
 ];
 
 const AddingBox = ({ setRefresh }) => {
+  const { Notification, setAlert } = usePrompt();
+
   const [fields, setFields] = useState({
     name: "",
     address: "",
@@ -34,9 +37,21 @@ const AddingBox = ({ setRefresh }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // console.log("submit", fields);
-    await post(fields);
-    setRefresh((prev) => !prev);
+    try {
+      await post(fields);
+      setAlert({
+        open: true,
+        status: "success",
+        message: "Succesfully post 1 entry to database.",
+      });
+      setRefresh((prev) => !prev);
+    } catch (e) {
+      setAlert({
+        open: true,
+        status: "error",
+        message: `Failed to post data to database. (${e.message})`,
+      });
+    }
   };
 
   const spawnData = () => {
@@ -54,49 +69,69 @@ const AddingBox = ({ setRefresh }) => {
 
   const newTenData = async () => {
     const data = [...Array(10).keys()].map((i) => spawnData());
-    await post(data);
-    setRefresh((prev) => !prev);
+    try {
+      await post(data);
+      setAlert({
+        open: true,
+        status: "success",
+        message: "Succesfully post 10 entries to database.",
+      });
+      setRefresh((prev) => !prev);
+    } catch (e) {
+      setAlert({
+        open: true,
+        status: "error",
+        message: `Failed to post data to database. (${e.message})`,
+      });
+    }
   };
 
   return (
-    <div className={S.box}>
-      <h1>Create New Company Info </h1>
+    <>
+      <Notification />
+      <div className={S.box}>
+        <h1>Create New Company Info </h1>
 
-      <form
-        // noValidate
-        autoComplete="off"
-        onSubmit={handleSubmit}
-      >
-        {metadata.map((v) => {
-          return (
-            <TextField
-              key={v.field}
-              id={v.field}
-              label={v.label}
-              variant="outlined"
-              value={fields[v.field]}
-              onChange={(e) => {
-                setFields({ ...fields, [v.field]: e.target.value });
-              }}
-              required
-              fullWidth
-              className={S.textField}
-              margin="normal"
-              size="small"
-            />
-          );
-        })}
-        <Button onClick={newOneData} variant="outlined">
-          New Data (1)
-        </Button>
-        <Button onClick={newTenData} variant="outlined">
-          New Data (10)
-        </Button>
-        <Button type="submit" variant="contained" endIcon={<SendIcon />}>
-          submit (POST)
-        </Button>
-      </form>
-    </div>
+        <form
+          // noValidate
+          autoComplete="off"
+          onSubmit={handleSubmit}
+        >
+          {metadata.map((v) => {
+            return (
+              <TextField
+                key={v.field}
+                id={v.field}
+                label={v.label}
+                variant="outlined"
+                value={fields[v.field]}
+                onChange={(e) => {
+                  setFields({ ...fields, [v.field]: e.target.value });
+                }}
+                required
+                fullWidth
+                className={S.textField}
+                margin="normal"
+                size="small"
+              />
+            );
+          })}
+          <Button onClick={newOneData} variant="outlined">
+            New Data (1)
+          </Button>
+          <Button
+            onClick={newTenData}
+            variant="contained"
+            endIcon={<SendIcon />}
+          >
+            New Data (10)
+          </Button>
+          <Button type="submit" variant="contained" endIcon={<SendIcon />}>
+            submit (POST)
+          </Button>
+        </form>
+      </div>
+    </>
   );
 };
 
