@@ -38,13 +38,22 @@ const AddingBox = () => {
     await post(fields);
   };
 
-  const makeSomeData = () => {
-    setFields({
+  const spawnData = () => {
+    return {
       name: faker.company.companyName(),
       address: `${faker.address.streetAddress()}, ${faker.address.cityName()} ${faker.address.zipCode()}, ${faker.address.country()}`,
       contact: faker.name.findName(),
       phone: faker.phone.phoneNumber(),
-    });
+    };
+  };
+
+  const newOneData = () => {
+    setFields(spawnData());
+  };
+
+  const newTenData = async () => {
+    const data = [...Array(10).keys()].map((i) => spawnData());
+    await post(data);
   };
 
   return (
@@ -75,8 +84,11 @@ const AddingBox = () => {
             />
           );
         })}
-        <Button onClick={makeSomeData} variant="outlined">
-          New Data
+        <Button onClick={newOneData} variant="outlined">
+          New Data (1)
+        </Button>
+        <Button onClick={newTenData} variant="outlined">
+          New Data (10)
         </Button>
         <Button type="submit" variant="contained" endIcon={<SendIcon />}>
           submit (POST)

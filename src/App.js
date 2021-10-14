@@ -19,6 +19,11 @@ const App = () => {
 export default App;
 
 // POST (new data) -> GET (new data)
+// POST: upload multiple entries, if one entries have error property and value. Raise Warning. Status Code 207?
 
 // constrait API, restrict input fields
 // batch delete??
+// delete (method2: append id in URL, url-encodeded)
+
+// performance optimize:
+// virtualize table

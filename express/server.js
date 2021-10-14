@@ -23,9 +23,12 @@ app.get("/", async (req, res) => {
 app.post("/", async (req, res) => {
   try {
     const result = await db.createComp(req.body);
-    res.send(`data received ${result._id}`);
-    // res.send(result);
-    debugPOST(`create new company: ${result.name}`);
+    res.send(result);
+    debugPOST(
+      `create new company: ${
+        Array.isArray(result) ? `${result.length} entries` : result.name
+      }`
+    );
   } catch (e) {
     res.status(500).send("database error");
     debugPOST(e.message);
@@ -49,6 +52,13 @@ app.delete("/", async (req, res) => {
     res.status(500).send("database error");
     debugDELETE(e.message);
   }
+});
+
+app.delete("/delete_all", async (req, res) => {
+  console.log(111);
+  const result = await db.deleteAllComp();
+  console.log(result);
+  res.send(result);
 });
 
 const port = 8080;

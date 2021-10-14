@@ -19,55 +19,39 @@ const compSchema = new mongoose.Schema({
 // compile schema into model (similar to class v.s. object)
 const Comp = mongoose.model("Company", compSchema); // return a class
 
-const createComp = async ({ name, address, contact, phone }) => {
-  const comp = new Comp({ name, address, contact, phone }); // new document
-  const result = await comp.save(); // upload document
+// GET
+const getComp = async () => {
+  return await Comp.find().select({ __v: 0 }); // remove useless field
+};
+
+// POST
+const createComp = async (data) => {
+  let result;
+  if (Array.isArray(data)) {
+    // multiple document
+    result = await Comp.insertMany(data);
+  } else {
+    // single document
+    const comp = new Comp(data); // new document
+    result = await comp.save(); // upload document
+  }
   return result;
 };
 
-const getComp = async () => {
-  return await Comp.find().select({ __v: 0 });
-};
-
+// DELETE
 const deleteComp = async (id) => {
   // find first one and delete that
   return await Comp.findByIdAndDelete({ _id: id });
 };
 
-// const getCourse = async () => {
-//   // /api/courses?pageNumber=2&pageSize=10
-//   const pageNumber = 2;
-//   const pageSize = 10;
-
-//   const courses = await Course.find({ author: "Po", isPublished: true })
-//     .skip((pageNumber - 1) * pageSize) // skip all documents in previous pages (not index)
-//     .limit(pageSize)
-//     .sort({ name: 1 })
-//     .select({ name: 1, tags: 1 });
-
-//   console.log(courses);
-// };
-
-// const updateCourse = async (id) => {
-//   const result = await Course.findByIdAndUpdate(
-//     id,
-//     {
-//       $set: {
-//         author: "Po",
-//         isPublished: false,
-//       },
-//     },
-//     { new: true }
-//   );
-
-//   console.log(result);
-// };
-
-// createCourse();
+const deleteAllComp = async () => {
+  return await Comp.deleteMany({});
+};
 
 module.exports = {
   model: Comp,
   createComp,
   getComp,
   deleteComp,
+  deleteAllComp,
 };

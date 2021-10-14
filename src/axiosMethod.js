@@ -6,7 +6,7 @@ export const get = async () => axios.get(host);
 export const post = async (data) => {
   try {
     const result = await axios.post(host, data);
-    // console.log("success", result);
+    console.log("success", result);
   } catch (e) {
     console.log("fail");
     console.log(e.response);
@@ -14,7 +14,9 @@ export const post = async (data) => {
   }
 };
 
-export const delete_ = async (id) => axios.delete(host, { data: { id } });
+export const deleteOne = async (id) => axios.delete(host, { data: { id } });
+
+export const deleteAll = async () => axios.delete(`${host}/delete_all`);
 
 // const post = async () => {
 //     try {
