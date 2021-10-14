@@ -85,7 +85,6 @@ const MuiTable = ({ refresh, setRefresh }) => {
   };
 
   const deleteData = async (id, index) => {
-    // console.log(id, index);
     try {
       await api.deleteOne(id);
       const copyRows = [...rows];
@@ -143,19 +142,32 @@ const MuiTable = ({ refresh, setRefresh }) => {
     const { id } = rowData;
     if (publish) {
       console.log("save");
-      api.put({
-        id: rowData.id,
-        company: rowData.company,
-        address: rowData.address,
-        contact: rowData.contact,
-        phone: rowData.phone,
-      });
+      try {
+        await api.put({
+          id: rowData.id,
+          name: rowData.company,
+          address: rowData.address,
+          contact: rowData.contact,
+          phone: rowData.phone,
+        });
+        setAlert({
+          open: true,
+          status: "success",
+          message: "Successfully updated data !",
+        });
+      } catch (e) {
+        console.log(e.message);
+        setAlert({
+          open: true,
+          status: "error",
+          message: `Failed to update data. (${e.message})`,
+        });
+      }
     } else {
       console.log("discard");
       setRows((prevRows) =>
         prevRows.map((row) => (row.id === id ? { ...rowSnapshot[id] } : row))
       );
-      // cannot us
     }
     toggleEditMode(id, false);
   };
