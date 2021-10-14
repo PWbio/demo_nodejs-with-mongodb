@@ -11,7 +11,7 @@ app.use(allowCORS);
 
 app.get("/", async (req, res) => {
   try {
-    const result = await db.getComp(req.body);
+    const result = await db.getComp();
     res.send(result);
     debugGET(`retrive ${result.length} documents`);
   } catch (e) {

@@ -24,7 +24,7 @@ const metadata = [
   },
 ];
 
-const AddingBox = () => {
+const AddingBox = ({ setRefresh }) => {
   const [fields, setFields] = useState({
     name: "",
     address: "",
@@ -36,6 +36,7 @@ const AddingBox = () => {
     e.preventDefault();
     // console.log("submit", fields);
     await post(fields);
+    setRefresh((prev) => !prev);
   };
 
   const spawnData = () => {
@@ -54,6 +55,7 @@ const AddingBox = () => {
   const newTenData = async () => {
     const data = [...Array(10).keys()].map((i) => spawnData());
     await post(data);
+    setRefresh((prev) => !prev);
   };
 
   return (

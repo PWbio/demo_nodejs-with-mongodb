@@ -1,16 +1,18 @@
+import { useState } from "react";
 import AddingBox from "./components/AddingBox";
 import Header from "./components/Header";
 import Divider from "@mui/material/Divider";
 import MuiTable from "./components/MuiTable";
 
 const App = () => {
+  const [refresh, setRefresh] = useState(true);
   return (
     <>
       <Header />
       <div style={{ margin: "1rem" }}>
-        <AddingBox />
+        <AddingBox setRefresh={setRefresh} />
         <Divider variant="middle" />
-        <MuiTable />
+        <MuiTable refresh={refresh} />
       </div>
     </>
   );

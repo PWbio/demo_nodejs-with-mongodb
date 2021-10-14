@@ -1,5 +1,4 @@
-import React, { useState } from "react";
-
+import React, { useState, useCallback } from "react";
 import { Alert, Snackbar } from "@mui/material";
 
 const usePrompt = () => {
@@ -16,21 +15,29 @@ const usePrompt = () => {
     setAlert({ ...alert, open: false });
   };
 
-  const Notification = () => (
-    <>
-      {open && (
-        <Snackbar
-          open={open}
-          autoHideDuration={3500}
-          onClose={handleClose}
-          anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
-        >
-          <Alert onClose={handleClose} severity={status} sx={{ width: "100%" }}>
-            {message}
-          </Alert>
-        </Snackbar>
-      )}
-    </>
+  // use callback to prevent unnecessary rendering
+  const Notification = useCallback(
+    () => (
+      <>
+        {open && (
+          <Snackbar
+            open={open}
+            autoHideDuration={3500}
+            onClose={handleClose}
+            anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+          >
+            <Alert
+              onClose={handleClose}
+              severity={status}
+              sx={{ width: "100%" }}
+            >
+              {message}
+            </Alert>
+          </Snackbar>
+        )}
+      </>
+    ),
+    [open]
   );
 
   return { Notification, setAlert };

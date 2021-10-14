@@ -6,14 +6,9 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
-import { get, deleteOne, deleteAll } from "../axiosMethod";
-
-import S from "./MuiTable.module.scss";
-
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
-import Notification from "./Notification";
-import usePrompt from "../hook/Message";
+import Tooltip from "@mui/material/Tooltip";
 
 import CloudDownloadIcon from "@mui/icons-material/CloudDownload";
 import WarningIcon from "@mui/icons-material/Warning";
@@ -21,7 +16,9 @@ import EditIcon from "@mui/icons-material/Edit";
 import RestoreIcon from "@mui/icons-material/Restore";
 import PublishIcon from "@mui/icons-material/Publish";
 
-import Tooltip from "@mui/material/Tooltip";
+import { get, deleteOne, deleteAll } from "../axiosMethod";
+import S from "./MuiTable.module.scss";
+import usePrompt from "../hook/Message";
 
 const columns = [
   { field: "company", headerName: "Company", width: 150 },
@@ -50,7 +47,7 @@ const EditableCell = ({ rowData, colName, onChange }) => {
   );
 };
 
-const MuiTable = () => {
+const MuiTable = ({ refresh }) => {
   const [rows, setRows] = useState([]);
   const [rowSnapshot, setRowSnapshot] = useState(new Object());
   const { Notification, setAlert } = usePrompt();
@@ -68,7 +65,7 @@ const MuiTable = () => {
         phone: v.phone,
         editMode: false,
       }));
-      //   console.log(parseData);
+      // console.log(parseData);
       setRows(parseData);
       setAlert({
         open: true,
@@ -152,8 +149,9 @@ const MuiTable = () => {
   };
 
   useEffect(() => {
+    console.log("gettttt");
     getData();
-  }, []);
+  }, [refresh]);
 
   return (
     <>
@@ -186,6 +184,7 @@ const MuiTable = () => {
           Make An Error (GET)
         </Button>
       </div>
+
       <TableContainer component={Paper}>
         <Table size="small" aria-label="simple table">
           <TableHead>
