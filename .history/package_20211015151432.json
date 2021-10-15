@@ -1,0 +1,19 @@
+{
+  "name": "express",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "server": "source ./express/debug.sh && nodemon ./express/server.js"
+  },
+  "dependencies": {
+    "debug": "^4.3.2",
+    "express": "^4.17.1",
+    "joi": "^17.4.2",
+    "mongoose": "^6.0.10"
+  },
+  "keywords": [],
+  "author": "Po",
+  "license": "ISC"
+}

@@ -1,0 +1,15 @@
+.Header {
+  height: 50px;
+  width: 100%;
+  background: #000;
+  color: #fff;
+  margin: 0;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+
+  span {
+    margin: 1rem;
+    font-size: 1.2rem;
+  }
+}
