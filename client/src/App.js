@@ -3,6 +3,9 @@ import AddingBox from "./components/AddingBox";
 import Header from "./components/Header";
 import Divider from "@mui/material/Divider";
 import MuiTable from "./components/MuiTable";
+import LineLogin from "./components/LineLogin";
+import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
+import Fail from "./components/Fail";
 
 const App = () => {
   // Trigger POST -> then GET newest data
@@ -11,9 +14,21 @@ const App = () => {
     <>
       <Header />
       <div style={{ margin: "1rem" }}>
-        <AddingBox setRefresh={setRefresh} />
-        <Divider variant="middle" />
-        <MuiTable refresh={refresh} setRefresh={setRefresh} />
+        <Router>
+          <Switch>
+            <Route exact path="/">
+              <LineLogin />
+            </Route>
+            <Route path="/home">
+              <AddingBox setRefresh={setRefresh} />
+              <Divider variant="middle" />
+              <MuiTable refresh={refresh} setRefresh={setRefresh} />
+            </Route>
+            <Route path="/login/failed">
+              <Fail />
+            </Route>
+          </Switch>
+        </Router>
       </div>
     </>
   );

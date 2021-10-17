@@ -17,7 +17,7 @@ import RestoreIcon from "@mui/icons-material/Restore";
 import PublishIcon from "@mui/icons-material/Publish";
 
 import * as api from "../axiosMethod";
-import S from "./MuiTable.module.scss";
+import S from "../scss/MuiTable.module.scss";
 import usePrompt from "../hook/Message";
 
 const columns = [
