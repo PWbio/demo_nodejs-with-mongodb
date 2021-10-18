@@ -3,7 +3,7 @@ const { InternalOAuthError } = require("passport-oauth2");
 
 class LineStrategy extends OAuth2Strategy {
   constructor(options, verify) {
-    super(options, verify);
+    super(...arguments);
     this.verify = verify;
     this.options = options || {};
     this.options.authorizationURL =

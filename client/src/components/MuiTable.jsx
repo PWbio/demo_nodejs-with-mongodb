@@ -55,24 +55,29 @@ const MuiTable = ({ refresh, setRefresh }) => {
   const getData = async (message = true, simulateError = false) => {
     try {
       if (simulateError) throw new Error("Just a fake alarm.");
-      const { data } = await api.get();
+      const { data } = await api.get(); // the return data may be HTML file if no API was found.
       // console.log(data);
-      const parseData = data.map((v) => ({
-        id: v._id, // require, @mui/x-data-grid.
-        company: v.name,
-        address: v.address,
-        contact: v.contact,
-        phone: v.phone,
-        editMode: false,
-      }));
-      // console.log(parseData);
-      setRows(parseData);
-      if (message) {
-        setAlert({
-          open: true,
-          status: "success",
-          message: "Succesfully retrieved data from database.",
-        });
+      if (Array.isArray(data)) {
+        const parseData = data.map((v) => ({
+          id: v._id, // require, @mui/x-data-grid.
+          company: v.name,
+          address: v.address,
+          contact: v.contact,
+          phone: v.phone,
+          editMode: false,
+        }));
+        // console.log(parseData);
+        setRows(parseData);
+
+        if (message) {
+          setAlert({
+            open: true,
+            status: "success",
+            message: "Succesfully retrieved data from database.",
+          });
+        }
+      } else {
+        throw new Error("Incorrect API");
       }
     } catch (e) {
       console.log(e.message);

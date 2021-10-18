@@ -2,15 +2,10 @@ const express = require("express");
 const app = express();
 const path = require("path");
 const helmet = require("helmet");
-const Joi = require("joi");
 const morgan = require("morgan");
 const allowCORS = require("./middleware/allowCORS");
-const { Company, User } = require("./mongoose");
+const { User } = require("./mongoose");
 
-const debugGET = require("debug")("API:GET");
-const debugPOST = require("debug")("API:POST");
-const debugDELETE = require("debug")("API:DELETE");
-const debugPUT = require("debug")("API:PUT");
 const debugLINE = require("debug")("API:LINE");
 
 const session = require("express-session");
@@ -18,8 +13,10 @@ const passport = require("passport");
 const LineStrategy = require("./LineStrategy");
 const config = require("config");
 
-// const isDev = app.get("env") === "development";
-const isDev = false;
+const company = require("./router/company");
+
+const isDev = app.get("env") === "development";
+// const isDev = false;
 if (isDev) {
   app.use(morgan("tiny"));
   app.use(allowCORS);
@@ -44,13 +41,13 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
-passport.serializeUser(function (user, done) {
+passport.serializeUser((user, done) => {
   debugLINE("serialize", user);
-  done(null, user._id);
+  done(null, user);
 });
-passport.deserializeUser(function (id, done) {
-  debugLINE("deserialize", id);
-  User.findById(id, (err, user) => {
+passport.deserializeUser((user, done) => {
+  debugLINE("deserialize", user._id);
+  User.findById(user._id, (err, user) => {
     done(err, user);
   });
 });
@@ -66,8 +63,8 @@ passport.use(
       state: config.get("state"),
       scope: ["profile"],
     },
-    function (accessToken, refreshToken, profile, cb) {
-      User.findOne({ userId: profile.userId }, function (err, user) {
+    (accessToken, refreshToken, profile, cb) => {
+      User.findOne({ userId: profile.userId }, (err, user) => {
         if (err) {
           return cb(err);
         }
@@ -91,7 +88,7 @@ passport.use(
   )
 );
 
-app.get("/line/login", passport.authenticate("line"));
+app.get("/line/login", passport.authenticate("line"), (req, res) => {});
 
 app.get("/line/login/callback", (req, res, next) => {
   passport.authenticate("line", (err, user, info) => {
@@ -123,7 +120,7 @@ app.get("/line/login/callback", (req, res, next) => {
     }
 
     // Establish session
-    req.logIn(user, function (err) {
+    req.logIn(user, (err) => {
       if (err) {
         debugLINE("session login failed");
 
@@ -143,120 +140,9 @@ app.get("/line/login/callback", (req, res, next) => {
   })(req, res, next);
 });
 
-const validateData = (data) => {
-  // input validation
-  const schema = Joi.array().items(
-    Joi.object({
-      id: Joi.string(),
-      name: Joi.string().required(),
-      address: Joi.string().required(),
-      contact: Joi.string().required(),
-      phone: Joi.string().required(),
-    })
-  );
-  return schema.validate(data);
-};
+app.use("/api", company);
 
-app.get("/get", async (req, res) => {
-  try {
-    const result = await Company.find().select({ __v: 0 }); // remove useless field
-    res.send(result);
-    debugGET(`retrive ${result.length} documents`);
-  } catch (e) {
-    res.status(404).send("data not found");
-    debugGET(e.message);
-  }
-});
-
-app.post("/post", async (req, res) => {
-  // convert req.body to array for input validation
-  const input = Array.isArray(req.body) ? req.body : [req.body];
-
-  const { error } = validateData(input);
-
-  if (error) {
-    debugPOST(error);
-    return res.status(400).send(error.details[0].message);
-  }
-
-  try {
-    const result = await Company.insertMany(input);
-    res.send(result);
-    debugPOST(
-      `create new company: ${
-        Array.isArray(result) ? `${result.length} entries` : result.name
-      }`
-    );
-  } catch (e) {
-    res.status(500).send("database error");
-    debugPOST(e.message);
-  }
-});
-
-app.delete("/delete", async (req, res) => {
-  // get the id from request
-  const { id } = req.body;
-  if (!id) return res.status(400).send("bad request: id is empty");
-  debugDELETE(id);
-
-  // find the data with the id
-  try {
-    await Company.find({ _id: id });
-  } catch (e) {
-    return res.status(404).send("data not found");
-  }
-
-  // delete data with the id
-  try {
-    const result = await Company.deleteOne({ _id: id });
-    debugDELETE(result);
-    res.status(200).end();
-  } catch (e) {
-    return res.status(500).send("database error");
-  }
-});
-
-app.delete("/delete_all", async (req, res) => {
-  try {
-    const result = await Company.deleteMany({});
-    debugDELETE(result);
-    res.status(200).end();
-  } catch (e) {
-    return res.status(500).send("database error");
-  }
-});
-
-app.put("/put", async (req, res) => {
-  const { id } = req.body;
-  if (!id) return res.status(400).send("bad request: id is empty");
-  debugPUT(`found ${id}`);
-
-  // find the data with the id
-  try {
-    await Company.find({ _id: id });
-  } catch (e) {
-    return res.status(404).send("data not found");
-  }
-
-  // delete data with the id
-  try {
-    const updateData = { ...req.body };
-    delete updateData.id;
-    const result = await Company.updateOne(
-      { _id: id },
-      {
-        $set: { ...updateData },
-      },
-      { new: true }
-    );
-    debugPUT(result);
-    res.status(200).end();
-  } catch (e) {
-    return res.status(500).send("database error");
-  }
-});
-
-app.get("*", function (req, res, next) {
+app.get("*", (req, res) => {
   // IMPORTANT!!! Required for using both "react-router-dom" and "redirect path from Node" together.
   // Need to place after all API call.
   res.sendFile(path.join(__dirname, "./client/build/"));
