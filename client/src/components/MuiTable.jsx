@@ -188,10 +188,6 @@ const MuiTable = ({ refresh, setRefresh }) => {
   };
 
   useEffect(() => {
-    getData();
-  }, []);
-
-  useEffect(() => {
     getData(false);
   }, [refresh]);
 
