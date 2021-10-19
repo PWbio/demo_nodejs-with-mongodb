@@ -64,11 +64,11 @@ router.delete("/delete", async (req, res) => {
   // get the id from request
   const { id } = req.body;
   if (!id) return res.status(400).send("bad request: id is empty");
-  debugDELETE(id);
 
   // find the data with the id
   try {
     await Company.find({ _id: id });
+    debugDELETE(id);
   } catch (e) {
     return res.status(404).send("data not found");
   }
@@ -96,31 +96,42 @@ router.delete("/delete_all", async (req, res) => {
 router.put("/put", async (req, res) => {
   const { id } = req.body;
   if (!id) return res.status(400).send("bad request: id is empty");
-  debugPUT(`found ${id}`);
 
   // find the data with the id
+  let doc;
   try {
-    await Company.find({ _id: id });
+    doc = await Company.findById(id);
+    debugPUT(`found ${id}`);
   } catch (e) {
     return res.status(404).send("data not found");
   }
 
-  // delete data with the id
+  const updateData = { ...req.body };
+  delete updateData.id; // remove id field
+
+  // update data with the id (query first)
   try {
-    const updateData = { ...req.body };
-    delete updateData.id;
-    const result = await Company.updateOne(
-      { _id: id },
-      {
-        $set: { ...updateData },
-      },
-      { new: true }
-    );
+    doc.set(updateData);
+    const result = await doc.save();
     debugPUT(result);
     res.status(200).end();
   } catch (e) {
     return res.status(500).send("database error");
   }
+
+  // update data with the id (update first)
+  // try {
+  //   const result = await Company.updateOne(
+  //     { _id: id },
+  //     {
+  //       $set: { ...updateData },
+  //     }
+  //   );
+  //   debugPUT(result);
+  //   res.status(200).end();
+  // } catch (e) {
+  //   return res.status(500).send("database error");
+  // }
 });
 
 module.exports = router;
