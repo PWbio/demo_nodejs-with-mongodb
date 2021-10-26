@@ -1,3 +1,4 @@
+require("./startup/logging")();
 const express = require("express");
 const app = express();
 const path = require("path");
@@ -143,9 +144,9 @@ app.get("/line/login/callback", (req, res, next) => {
 app.use("/api", company);
 
 app.get("*", (req, res) => {
-  // IMPORTANT!!! Required for using both "react-router-dom" and "redirect path from Node" together.
-  // Need to place after all API call.
-  res.sendFile(path.join(__dirname, "./client/build/"));
+  // IMPORTANT!!! This is required for using both "react-router-dom" and "express" together.
+  // This should be placed after all API endpoints.
+  res.sendFile(path.join(__dirname, "./client/build/index.html"));
 });
 
 const port = 8080;

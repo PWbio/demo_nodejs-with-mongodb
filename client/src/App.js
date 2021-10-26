@@ -27,6 +27,7 @@ const App = () => {
             <Route path="/login/failed">
               <Fail />
             </Route>
+            <Route>Page not found</Route>
           </Switch>
         </Router>
       </div>
