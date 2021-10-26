@@ -29,32 +29,12 @@ module.exports = {
     });
 
     /**
+     * handle errors outside middleware (method 1, used)
+     * @approach catch 'uncaughtException' and 'uncaughtRejection' in one file.
      * @note For winston@3.3.3, we cannot solely catch 'uncaughtRejection'.
-     * @note We will catch both 'uncaughtException' and 'uncaughtRejection' at one file.
+     * @openIssue https://github.com/winstonjs/winston/issues/1673
+     * @openIssue 'handleRejections' will write on 'handleExceptions' transport. Cannot solely catch 'handleRejections'
      */
-
-    // handle error from sync code outside express routes (uncaughtException)
-
-    //   winston.exceptions.handle(
-    //     new winston.transports.File({
-    //       filename: "logs/exceptions.log",
-    //     })
-    //   );
-
-    // handle error from async code outside express routes (uncaughtRejection)
-
-    // [open issue] https://github.com/winstonjs/winston/issues/1834
-    // "winston.rejections" is not a public property.
-
-    //   winston.rejections.handle(
-    //     new winston.transports.File({
-    //       filename: "logs/rejections.log",
-    //     })
-    //   );
-
-    // [open issue] https://github.com/winstonjs/winston/issues/1673
-    // 'handleRejections' will write on 'handleExceptions' transport. Cannot solely catch 'handleRejections'
-
     winston.add(
       new winston.transports.File({
         filename: "logs/ExRej.log",
@@ -65,8 +45,30 @@ module.exports = {
       })
     );
 
-    // Another work-around is to catch async rejection and pass it to exception
+    /**
+     * handle errors outside middleware (method 2, clean code, but not work due to bug in winston@3.3.3)
+     * @approach catch 'uncaughtException' and 'uncaughtRejection' in separate files.
+     * @openIssue https://github.com/winstonjs/winston/issues/1834
+     * @openIssue "winston.rejections" is not exposed as a public property.
+     */
+    // handle error from sync code outside express routes (uncaughtException)
+    //   winston.exceptions.handle(
+    //     new winston.transports.File({
+    //       filename: "logs/exceptions.log",
+    //     })
+    //   );
 
+    // handle error from async code outside express routes (uncaughtRejection)
+    //   winston.rejections.handle(
+    //     new winston.transports.File({
+    //       filename: "logs/rejections.log",
+    //     })
+    //   );
+
+    /**
+     * handle errors outside middleware (method 3, work but not ideal)
+     * @approach catch 'uncaughtRejection', throw an error, and catch as 'uncaughtException'.
+     */
     //   process.on("unhandledRejection", (ex) => {
     //     throw new Error(ex);
     //   });
