@@ -1,9 +1,9 @@
-require("./startup/logging")();
 const express = require("express");
 const app = express();
-const path = require("path");
+
+require("./startup/logging").initialize(app);
+
 const helmet = require("helmet");
-const morgan = require("morgan");
 const allowCORS = require("./middleware/allowCORS");
 const { User } = require("./mongoose");
 
@@ -19,7 +19,6 @@ const company = require("./router/company");
 const isDev = app.get("env") === "development";
 // const isDev = false;
 if (isDev) {
-  app.use(morgan("tiny"));
   app.use(allowCORS);
 }
 

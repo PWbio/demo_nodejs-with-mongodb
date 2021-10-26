@@ -1,83 +1,116 @@
-// we will set up default logger here.
-const winston = require("winston");
+const morgan = require("morgan");
+const winston = require("winston"); // we will set up default logger here.
 const { format } = winston;
 const { combine, timestamp, prettyPrint, colorize, simple, json } = format;
 require("winston-mongodb");
+require("express-async-errors"); // handle errors for async code inside express routes: catch error and pass it to next()
 
-// handle errors for async code inside express routes: catch error and pass it to next()
-require("express-async-errors");
+module.exports = {
+  initialize: function (app) {
+    /**
+     * @note logger for normal message, such as console.log()
+     */
 
-module.exports = function () {
-  // write to local file
-  winston.add(
-    new winston.transports.File({
-      filename: "logs/logfile.log",
+    this.defaultLogger = winston.createLogger({
       level: "info",
-      format: combine(timestamp(), json()),
-    })
-  );
+      transports: [
+        // write to local file
+        new winston.transports.File({
+          filename: "logs/logger.log",
+          format: combine(timestamp(), json()),
+        }),
+        // write to mongoDB
+        new winston.transports.MongoDB({
+          db: "mongodb://localhost/logger",
+          level: "info",
+          options: { useUnifiedTopology: true },
+        }),
+      ],
+    });
 
-  // write to mongoDB
-  winston.add(
-    new winston.transports.MongoDB({
-      db: "mongodb://localhost/logger",
-      level: "info",
-      options: { useUnifiedTopology: true },
-    })
-  );
+    /**
+     * @note For winston@3.3.3, we cannot solely catch 'uncaughtRejection'.
+     * @note We will catch both 'uncaughtException' and 'uncaughtRejection' at one file.
+     */
 
-  // print to console in development mode
-  if (process.env.NODE_ENV !== "production") {
+    // handle error from sync code outside express routes (uncaughtException)
+
+    //   winston.exceptions.handle(
+    //     new winston.transports.File({
+    //       filename: "logs/exceptions.log",
+    //     })
+    //   );
+
+    // handle error from async code outside express routes (uncaughtRejection)
+
+    // [open issue] https://github.com/winstonjs/winston/issues/1834
+    // "winston.rejections" is not a public property.
+
+    //   winston.rejections.handle(
+    //     new winston.transports.File({
+    //       filename: "logs/rejections.log",
+    //     })
+    //   );
+
+    // [open issue] https://github.com/winstonjs/winston/issues/1673
+    // 'handleRejections' will write on 'handleExceptions' transport. Cannot solely catch 'handleRejections'
+
     winston.add(
-      new winston.transports.Console({
-        level: "info",
-        format: combine(prettyPrint(), colorize(), simple()),
+      new winston.transports.File({
+        filename: "logs/ExRej.log",
+        level: "warn",
+        format: combine(timestamp(), json()),
         handleExceptions: true,
         handleRejections: true,
       })
     );
-  }
 
-  /**
-   * @note For winston@3.3.3, we cannot solely catch 'uncaughtRejection'.
-   * @note We will catch both 'uncaughtException' and 'uncaughtRejection' at one file.
-   */
+    // Another work-around is to catch async rejection and pass it to exception
 
-  // handle error from sync code outside express routes (uncaughtException)
+    //   process.on("unhandledRejection", (ex) => {
+    //     throw new Error(ex);
+    //   });
 
-  //   winston.exceptions.handle(
-  //     new winston.transports.File({
-  //       filename: "logs/exceptions.log",
-  //     })
-  //   );
+    /**
+     * @note pass morgan output (HTTP request) to winston
+     */
 
-  // handle error from async code outside express routes (uncaughtRejection)
+    this.httpLogger = winston.createLogger({
+      level: "http",
+      transports: [
+        new winston.transports.File({
+          filename: "logs/http.log",
+          format: combine(timestamp(), json()),
+        }),
+      ],
+    });
 
-  // [open issue] https://github.com/winstonjs/winston/issues/1834
-  // "winston.rejections" is not a public property.
+    app.use(
+      morgan("tiny", {
+        stream: { write: (message) => this.httpLogger.http(message.trim()) },
+      })
+    );
 
-  //   winston.rejections.handle(
-  //     new winston.transports.File({
-  //       filename: "logs/rejections.log",
-  //     })
-  //   );
+    /**
+     * @note print to console in development mode
+     */
 
-  // [open issue] https://github.com/winstonjs/winston/issues/1673
-  // 'handleRejections' will write on 'handleExceptions' transport. Cannot solely catch 'handleRejections'
+    if (process.env.NODE_ENV !== "production") {
+      const console = (level, handleError) =>
+        new winston.transports.Console({
+          level: level,
+          format: combine(prettyPrint(), colorize(), simple()),
+          handleExceptions: handleError,
+          handleRejections: handleError,
+        });
 
-  winston.add(
-    new winston.transports.File({
-      filename: "logs/ExRej.log",
-      level: "info",
-      format: combine(timestamp(), json()),
-      handleExceptions: true,
-      handleRejections: true,
-    })
-  );
+      winston.add(console("warn", true));
+      this.httpLogger.add(console("http", false));
+      this.defaultLogger.add(console("info", false));
 
-  // Another work-around is to catch async rejection and pass it to exception
+      winston.addColors({ http: "yellow" });
+    }
 
-  //   process.on("unhandledRejection", (ex) => {
-  //     throw new Error(ex);
-  //   });
+    return this;
+  },
 };
