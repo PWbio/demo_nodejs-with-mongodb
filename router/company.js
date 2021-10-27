@@ -1,25 +1,10 @@
 const express = require("express");
 const router = express.Router();
-const Joi = require("joi");
 const debugGET = require("debug")("API:GET");
 const debugPOST = require("debug")("API:POST");
 const debugDELETE = require("debug")("API:DELETE");
 const debugPUT = require("debug")("API:PUT");
-const { Company } = require("../mongoose");
-
-const validateData = (data) => {
-  // input validation
-  const schema = Joi.array().items(
-    Joi.object({
-      id: Joi.string(),
-      name: Joi.string().required(),
-      address: Joi.string().required(),
-      contact: Joi.string().required(),
-      phone: Joi.string().required(),
-    })
-  );
-  return schema.validate(data);
-};
+const { Company, validateCompany } = require("../models/company");
 
 router.get("/get", async (req, res) => {
   debugGET(req.session); // use "req.session.passport" to get deserialized user information
@@ -39,7 +24,7 @@ router.post("/post", async (req, res) => {
   // convert req.body to array for input validation
   const input = Array.isArray(req.body) ? req.body : [req.body];
 
-  const { error } = validateData(input);
+  const { error } = validateCompany(input);
 
   if (error) {
     debugPOST(error);

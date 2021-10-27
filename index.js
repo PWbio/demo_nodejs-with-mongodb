@@ -2,10 +2,12 @@ const express = require("express");
 const app = express();
 
 require("./startup/logging").initialize(app);
+require("./startup/db")();
 
+const path = require("path");
 const helmet = require("helmet");
 const allowCORS = require("./middleware/allowCORS");
-const { User } = require("./mongoose");
+const User = require("./models/user");
 
 const debugLINE = require("debug")("API:LINE");
 
