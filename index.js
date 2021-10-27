@@ -2,11 +2,9 @@ const express = require("express");
 const app = express();
 
 require("./startup/logging").initialize(app);
+require("./startup/routes")(app);
 require("./startup/db")();
 
-const path = require("path");
-const helmet = require("helmet");
-const allowCORS = require("./middleware/allowCORS");
 const User = require("./models/user");
 
 const debugLINE = require("debug")("API:LINE");
@@ -15,22 +13,6 @@ const session = require("express-session");
 const passport = require("passport");
 const LineStrategy = require("./LineStrategy");
 const config = require("config");
-
-const company = require("./router/company");
-
-const isDev = app.get("env") === "development";
-// const isDev = false;
-if (isDev) {
-  app.use(allowCORS);
-}
-
-app.use(express.json());
-app.use(
-  helmet({
-    contentSecurityPolicy: false, // safari forces SSL (https) to request resource (CSS/JS) if turning on.
-  })
-);
-app.use(express.static("client/build")); // to server compiled React page.
 
 app.use(
   session({
@@ -140,14 +122,6 @@ app.get("/line/login/callback", (req, res, next) => {
       return res.redirect(isDev ? "http://localhost:3000/home" : "/home");
     });
   })(req, res, next);
-});
-
-app.use("/api", company);
-
-app.get("*", (req, res) => {
-  // IMPORTANT!!! This is required for using both "react-router-dom" and "express" together.
-  // This should be placed after all API endpoints.
-  res.sendFile(path.join(__dirname, "./client/build/index.html"));
 });
 
 const port = 8080;

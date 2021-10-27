@@ -4,6 +4,7 @@ const { format } = winston;
 const { combine, timestamp, prettyPrint, colorize, simple, json } = format;
 require("winston-mongodb");
 require("express-async-errors"); // handle errors for async code inside express routes: catch error and pass it to next()
+const isDev = require("../startup/devState");
 
 module.exports = {
   initialize: function (app) {
@@ -97,7 +98,7 @@ module.exports = {
      * @note print to console in development mode
      */
 
-    if (process.env.NODE_ENV !== "production") {
+    if (isDev) {
       const console = (level, handleError) =>
         new winston.transports.Console({
           level: level,
