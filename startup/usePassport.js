@@ -2,7 +2,7 @@ const passport = require("passport");
 const session = require("express-session");
 const User = require("../models/user");
 const config = require("config");
-const LineStrategy = require("../LineStrategy");
+const LineStrategy = require("../oauth2/LineStrategy");
 const debugLINE = require("debug")("API:LINE");
 
 module.exports = function (app) {

@@ -10,6 +10,9 @@ const compSchema = new mongoose.Schema({
 });
 
 function validateCompany(company) {
+  // convert to array for input validation
+  company = Array.isArray(company) ? company : [company];
+
   // validate data send from client request
   const schema = Joi.array().items(
     Joi.object({
@@ -25,4 +28,4 @@ function validateCompany(company) {
 
 const Company = mongoose.model("Company", compSchema);
 
-module.exports = { Company, validateCompany };
+module.exports = { Company, validate: validateCompany };

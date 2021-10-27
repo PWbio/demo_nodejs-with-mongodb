@@ -1,9 +1,9 @@
 const express = require("express");
 const app = express();
 
-require("./startup/logging").initialize(app);
+const { defaultLogger } = require("./startup/logging").initialize(app);
 require("./startup/routes")(app);
 require("./startup/db")();
 
 const port = 8080;
-app.listen(port, () => console.log(`Listening on port ${port} ...`));
+app.listen(port, () => defaultLogger.info(`Listening on port ${port} ...`));

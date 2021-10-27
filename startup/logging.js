@@ -79,7 +79,7 @@ module.exports = {
      */
 
     this.httpLogger = winston.createLogger({
-      level: "http",
+      level: "verbose",
       transports: [
         new winston.transports.File({
           filename: "logs/http.log",
@@ -108,7 +108,7 @@ module.exports = {
         });
 
       winston.add(console("warn", true));
-      this.httpLogger.add(console("http", false));
+      this.httpLogger.add(console("verbose", false));
       this.defaultLogger.add(console("info", false));
 
       winston.addColors({ http: "yellow" });
